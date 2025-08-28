@@ -110,6 +110,22 @@ Future<void> showExpenses() async {
   print("Total expenses = $total฿");
 }
 
+Future<List<Map<String, dynamic>>> searchExpenses(
+  int userId,
+  String keyword,
+) async {
+  final url = Uri.parse(
+    'http://localhost:3000/expense/search?user_id=$userId&keyword=${Uri.encodeComponent(keyword)}',
+  );
+  final response = await http.get(url);
+  if (response.statusCode != 200) {
+    print('Failed to search expenses: ${response.body}');
+    return [];
+  }
+  final jsonResult = json.decode(response.body) as List;
+  return jsonResult.cast<Map<String, dynamic>>();
+}
+
 Future<void> addExpense() async {
   if (loggedInUserId == null) {
     print("User not logged in.");
