@@ -109,3 +109,27 @@ Future<void> showExpenses() async {
   }
   print("Total expenses = $total฿");
 }
+
+Future<void> deleteExpense() async {
+  if (loggedInUserId == null) {
+    print("User not logged in.");
+    return;
+  }
+  print("===== Delete an item =====");
+  stdout.write("Item id: ");
+  String? idStr = stdin.readLineSync()?.trim();
+  int? id = int.tryParse(idStr ?? '');
+  if (id == null) {
+    print("Invalid ID.");
+    return;
+  }
+  final url = Uri.parse(
+    'http://localhost:3000/expense/$id?user_id=$loggedInUserId',
+  );
+  final response = await http.delete(url);
+  if (response.statusCode == 200) {
+    print("Deleted!");
+  } else {
+    print("Failed to delete expense: ${response.body}");
+  }
+}
