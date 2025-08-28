@@ -82,3 +82,30 @@ Future<bool> login() async {
     return false;
   }
 }
+
+Future<void> showExpenses() async {
+  if (loggedInUserId == null) {
+    print("User not logged in.");
+    return;
+  }
+  final url = Uri.parse(
+    'http://localhost:3000/expense?user_id=$loggedInUserId',
+  );
+  final response = await http.get(url);
+  if (response.statusCode != 200) {
+    print('Failed to fetch expenses: ${response.body}');
+    return;
+  }
+  final jsonResult = json.decode(response.body) as List;
+
+  int total = 0;
+  for (var exp in jsonResult) {
+    final dt = DateTime.parse(exp['date']);
+    final dtLocal = dt.toLocal();
+    print(
+      "${exp['id']}. ${exp['item']} : ${exp['paid']}฿ : ${dtLocal.toString().substring(0, 19)}",
+    );
+    total += exp['paid'] as int;
+  }
+  print("Total expenses = $total฿");
+}
