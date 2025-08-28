@@ -109,3 +109,32 @@ Future<void> showExpenses() async {
   }
   print("Total expenses = $total฿");
 }
+
+Future<void> addExpense() async {
+  if (loggedInUserId == null) {
+    print("User not logged in.");
+    return;
+  }
+  print("===== Add new item =====");
+  stdout.write("Item: ");
+  String? item = stdin.readLineSync()?.trim();
+  stdout.write("Paid: ");
+  String? paidStr = stdin.readLineSync()?.trim();
+  int? paid = int.tryParse(paidStr ?? '');
+  if (item == null || item.isEmpty || paid == null) {
+    print("Invalid input.");
+    return;
+  }
+  final body = {
+    "user_id": loggedInUserId.toString(),
+    "item": item,
+    "paid": paid.toString(),
+  };
+  final url = Uri.parse('http://localhost:3000/expense');
+  final response = await http.post(url, body: body);
+  if (response.statusCode == 201) {
+    print("Inserted!");
+  } else {
+    print("Failed to add expense: ${response.body}");
+  }
+}
