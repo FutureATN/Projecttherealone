@@ -138,6 +138,53 @@ Future<void> addExpense() async {
     print("Failed to add expense: ${response.body}");
   }
 }
+Future<void> showTodayExpenses() async {
+  if (loggedInUserId == null) {
+    print("User not logged in.");
+    return;
+  }
+  final url = Uri.parse(
+    'http://localhost:3000/expense/today?user_id=$loggedInUserId',
+  );
+  final response = await http.get(url);
+  if (response.statusCode != 200) {
+    print('Failed to fetch today\'s expenses: ${response.body}');
+    return;
+  }
+  final jsonResult = json.decode(response.body) as List;
+
+  final today = DateTime.now().toIso8601String().substring(0, 10);
+  int total = 0;
+  if (jsonResult.isEmpty) {
+    print("No expenses for today.");
+    return;
+  }
+  for (var exp in jsonResult) {
+    final dt = DateTime.parse(exp['date']);
+    final dtLocal = dt.toLocal();
+    print(
+      "${exp['id']}. ${exp['item']} : ${exp['paid']}฿ : ${dtLocal.toString().substring(0, 19)}",
+    );
+    total += exp['paid'] as int;
+  }
+  print("Total expenses = $total฿");
+}
+
+Future<List<Map<String, dynamic>>> searchExpenses(
+  int userId,
+  String keyword,
+) async {
+  final url = Uri.parse(
+    'http://localhost:3000/expense/search?user_id=$userId&keyword=${Uri.encodeComponent(keyword)}',
+  );
+  final response = await http.get(url);
+  if (response.statusCode != 200) {
+    print('Failed to search expenses: ${response.body}');
+    return [];
+  }
+  final jsonResult = json.decode(response.body) as List;
+  return jsonResult.cast<Map<String, dynamic>>();
+}
 
 Future<void> deleteExpense() async {
   if (loggedInUserId == null) {
